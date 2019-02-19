@@ -80,46 +80,48 @@ jobs:
             export M2_HOME=/usr/lib/mvn
             jfrog rt c artifactory-qa --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USERNAME --password=$ARTIFACTORY_PASSWORD
             docker exec -it projecttemplate_maven_1 mvn -f "/root/.m2/pom.xml" verify -P integration-test
-  publish:
-    <<: *defaults
-    steps:
-      - *attach_workspace
-      - setup_remote_docker
-      - run:
-          name: Extract Git SHA
-          command: |
-            echo 'export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})' >> $BASH_ENV
-      - run:
-          name: Build Docker Image
-          command: |
-            aws ecr get-login --no-include-email --region $AWS_REGION | awk '{printf $6}' | docker login -u AWS $DOCKER_REPO --password-stdin
-            if [ "$CIRCLE_BRANCH" = "master" ]
-            then
-                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH -t $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH .
-            else
-                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH .
-            fi
-      - run:
-          name: Publish Docker Image
-          command: |
-            docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM
-            docker push $DOCKER_REPO/projecttemplate:$GIT_HASH
-            if [ "$CIRCLE_BRANCH" = "master" ]
-            then
-                docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH
-            fi
-  deploy:
-    working_directory: /devops
-    docker:
-      - image: $DOCKER_REPO/devops:master
-    steps:
-      - run:
-          name: Deploy
-          command: |
-            bash kubeconfig.sh
-            export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})
-            helm upgrade --install --force --namespace $STACK projecttemplate-$STACK ./charts/projecttemplate --set image.tag=$GIT_HASH \
-            -f ./charts/projecttemplate/$STACK.yaml --tls --recreate-pods
+
+### Commented out to prevent template from publishing or deploying ###
+#  publish:
+#    <<: *defaults
+#    steps:
+#      - *attach_workspace
+#      - setup_remote_docker
+#      - run:
+#          name: Extract Git SHA
+#          command: |
+#            echo 'export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})' >> $BASH_ENV
+#      - run:
+#          name: Build Docker Image
+#          command: |
+#            aws ecr get-login --no-include-email --region $AWS_REGION | awk '{printf $6}' | docker login -u AWS $DOCKER_REPO --password-stdin
+#            if [ "$CIRCLE_BRANCH" = "master" ]
+#            then
+#                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH -t $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH .
+#            else
+#                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH .
+#            fi
+#      - run:
+#          name: Publish Docker Image
+#          command: |
+#            docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM
+#            docker push $DOCKER_REPO/projecttemplate:$GIT_HASH
+#            if [ "$CIRCLE_BRANCH" = "master" ]
+#            then
+#                docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH
+#            fi
+#  deploy:
+#    working_directory: /devops
+#    docker:
+#      - image: $DOCKER_REPO/devops:master
+#    steps:
+#      - run:
+#          name: Deploy
+#          command: |
+#            bash kubeconfig.sh
+#            export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})
+#            helm upgrade --install --force --namespace $STACK projecttemplate-$STACK ./charts/projecttemplate --set image.tag=$GIT_HASH \
+#            -f ./charts/projecttemplate/$STACK.yaml --tls --recreate-pods
 workflows:
   version: 2
   qa01_workflow:
@@ -141,18 +143,19 @@ workflows:
           context: qa01
           requires:
             - build
-      - publish:
-          context: qa01
-          requires:
-            - unit_test
-            - integration_test
-          filters:
-            branches:
-              only: master
-      - deploy:
-          context: qa01
-          requires:
-            - publish
-          filters:
-            branches:
-              only: master
+### Commented out to prevent template from publishing or deploying ###
+#      - publish:
+#          context: qa01
+#          requires:
+#            - unit_test
+#            - integration_test
+#          filters:
+#            branches:
+#              only: master
+#      - deploy:
+#          context: qa01
+#          requires:
+#            - publish
+#          filters:
+#            branches:
+#              only: master
