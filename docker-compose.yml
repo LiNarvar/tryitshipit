@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  postgres_db:
+    image: postgres:11.2
+    restart: always
+    volumes:
+    - data:/var/lib/postgresql/data
+
+  load_the_data:
+    image: postgres:11.2
+    volumes:
+    - ./db:/docker-entrypoint-initdb.d
+    links:
+    - postgres_db
+    command: |
+      sh -c "
+        echo initializing schema
+        cd /docker-entrypoint-initdb.d
+        while [ true ]
+        do
+          echo \"trying to apply schema.\"
+          psql -h postgres_db -U postgres -d postgres -a -f schema.sql &&
+          psql -h postgres_db -U postgres -d postgres -a -f import_test_data.sql &&
+          break
+        done
+      "
+
+  maven:
+    image: maven:3.6.0-jdk-8
+    volumes:
+    - ./:/root/.m2/
+    - ~/.m2/repository:/root/.m2/repository
+    command: |
+      sh -c "
+        sleep infinity
+      "
+    depends_on:
+    - postgres_db
+    - load_the_data
+
+  locus:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: locus:latest
+    ports:
+    - "80:8080"
+    depends_on:
+    - postgres_db
+    - load_the_data
+    restart: on-failure
+
+volumes:
+  data: {}

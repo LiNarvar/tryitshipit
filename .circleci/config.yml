@@ -1,0 +1,158 @@
+aliases:
+  - &defaults
+    docker:
+    - image: $DOCKER_REPO/alpine-oraclejdk8:2
+    working_directory: ~/projecttemplate
+  - &attach_workspace
+    attach_workspace:
+      at: ~/
+  - &create_deps_checksum
+    run: cat pom.xml ./*/pom.xml > deps_checksum
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - *create_deps_checksum
+      - restore_cache:
+          keys:
+            - projecttemplate-v1-{{ arch }}-{{ .Branch }}-{{ checksum "deps_checksum" }}
+            - projecttemplate-v1-{{ arch }}-{{ .Branch }}
+            - locprojecttemplateus-v1-{{ arch }}
+      - *attach_workspace
+      - run:
+          name: Build JAR file to run
+          command: |
+            export M2_HOME=/usr/lib/mvn
+            jfrog rt c artifactory-qa --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USERNAME --password=$ARTIFACTORY_PASSWORD
+            jfrog rt mvn "install -f pom.xml -Dmaven.test.skip=true" /root/artifactory.yml
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - projecttemplate
+            - .m2
+  cache_dependencies:
+    <<: *defaults
+    steps:
+      - *attach_workspace
+      - *create_deps_checksum
+      - save_cache:
+          key: projecttemplate-v1-{{ arch }}-{{ .Branch }}-{{ checksum "deps_checksum" }}
+          paths:
+            - ~/.m2
+  unit_test:
+    <<: *defaults
+    steps:
+      - *attach_workspace
+      - run:
+          name: Run Unit Test
+          command: |
+            export M2_HOME=/usr/lib/mvn
+            jfrog rt c artifactory-qa --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USERNAME --password=$ARTIFACTORY_PASSWORD
+            jfrog rt mvn "test -f pom.xml" /root/artifactory.yml
+  integration_test:
+    <<: *defaults
+    steps:
+      - *attach_workspace
+      - run:
+          name: Install Docker Compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+      - setup_remote_docker
+      - run:
+          name: Extract Git SHA
+          command: |
+            echo 'export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})' >> $BASH_ENV
+      - run:
+          name: Start Docker
+          command: |
+            aws ecr get-login --no-include-email --region $AWS_REGION | awk '{printf $6}' | docker login -u AWS $DOCKER_REPO --password-stdin
+            docker-compose up --build -d
+            docker cp ./db projecttemplate_postgres_db_1:/docker-entrypoint-initdb.d
+            docker cp ./ projecttemplate_maven_1:/root/.m2/
+            docker cp ~/.m2/repository projecttemplate_maven_1:/root/.m2/repository
+      - run:
+          name: Run Integration Tests
+          command: |
+            export M2_HOME=/usr/lib/mvn
+            jfrog rt c artifactory-qa --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USERNAME --password=$ARTIFACTORY_PASSWORD
+            docker exec -it projecttemplate_maven_1 mvn -f "/root/.m2/pom.xml" verify -P integration-test
+  publish:
+    <<: *defaults
+    steps:
+      - *attach_workspace
+      - setup_remote_docker
+      - run:
+          name: Extract Git SHA
+          command: |
+            echo 'export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})' >> $BASH_ENV
+      - run:
+          name: Build Docker Image
+          command: |
+            aws ecr get-login --no-include-email --region $AWS_REGION | awk '{printf $6}' | docker login -u AWS $DOCKER_REPO --password-stdin
+            if [ "$CIRCLE_BRANCH" = "master" ]
+            then
+                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH -t $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH .
+            else
+                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH .
+            fi
+      - run:
+          name: Publish Docker Image
+          command: |
+            docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM
+            docker push $DOCKER_REPO/projecttemplate:$GIT_HASH
+            if [ "$CIRCLE_BRANCH" = "master" ]
+            then
+                docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH
+            fi
+  deploy:
+    working_directory: /devops
+    docker:
+      - image: $DOCKER_REPO/devops:master
+    steps:
+      - run:
+          name: Deploy
+          command: |
+            bash kubeconfig.sh
+            export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})
+            helm upgrade --install --force --namespace $STACK projecttemplate-$STACK ./charts/projecttemplate --set image.tag=$GIT_HASH \
+            -f ./charts/projecttemplate/$STACK.yaml --tls --recreate-pods
+workflows:
+  version: 2
+  qa01_workflow:
+    jobs:
+      - build:
+          context: qa01
+      - cache_dependencies:
+          context: qa01
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - unit_test:
+          context: qa01
+          requires:
+            - build
+      - integration_test:
+          context: qa01
+          requires:
+            - build
+      - publish:
+          context: qa01
+          requires:
+            - unit_test
+            - integration_test
+          filters:
+            branches:
+              only: master
+      - deploy:
+          context: qa01
+          requires:
+            - publish
+          filters:
+            branches:
+              only: master
