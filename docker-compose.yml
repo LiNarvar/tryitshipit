@@ -2,12 +2,14 @@ version: '3'
 
 services:
   postgres_db:
+    container_name: postgres_db
     image: postgres:11.2
     restart: always
     volumes:
     - data:/var/lib/postgresql/data
 
   load_the_data:
+    container_name: data_loader
     image: postgres:11.2
     volumes:
     - ./db:/docker-entrypoint-initdb.d
