@@ -2,7 +2,7 @@ aliases:
   - &defaults
     docker:
     - image: $DOCKER_REPO/alpine-oraclejdk8:2
-    working_directory: ~/projecttemplate
+    working_directory: ~/tryitshipit
   - &attach_workspace
     attach_workspace:
       at: ~/
@@ -18,9 +18,9 @@ jobs:
       - *create_deps_checksum
       - restore_cache:
           keys:
-            - projecttemplate-v1-{{ arch }}-{{ .Branch }}-{{ checksum "deps_checksum" }}
-            - projecttemplate-v1-{{ arch }}-{{ .Branch }}
-            - locprojecttemplateus-v1-{{ arch }}
+            - tryitshipit-v1-{{ arch }}-{{ .Branch }}-{{ checksum "deps_checksum" }}
+            - tryitshipit-v1-{{ arch }}-{{ .Branch }}
+            - tryitshipit-v1-{{ arch }}
       - *attach_workspace
       - run:
           name: Build JAR file to run
@@ -31,7 +31,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - projecttemplate
+            - tryitshipit
             - .m2
   cache_dependencies:
     <<: *defaults
@@ -39,7 +39,7 @@ jobs:
       - *attach_workspace
       - *create_deps_checksum
       - save_cache:
-          key: projecttemplate-v1-{{ arch }}-{{ .Branch }}-{{ checksum "deps_checksum" }}
+          key: tryitshipit-v1-{{ arch }}-{{ .Branch }}-{{ checksum "deps_checksum" }}
           paths:
             - ~/.m2
   unit_test:
@@ -71,15 +71,15 @@ jobs:
           command: |
             aws ecr get-login --no-include-email --region $AWS_REGION | awk '{printf $6}' | docker login -u AWS $DOCKER_REPO --password-stdin
             docker-compose up --build -d
-            docker cp ./db projecttemplate_postgres_db_1:/docker-entrypoint-initdb.d
-            docker cp ./ projecttemplate_maven_1:/root/.m2/
-            docker cp ~/.m2/repository projecttemplate_maven_1:/root/.m2/repository
+            docker cp ./db tryitshipit_postgres_db_1:/docker-entrypoint-initdb.d
+            docker cp ./ tryitshipit_maven_1:/root/.m2/
+            docker cp ~/.m2/repository tryitshipit_maven_1:/root/.m2/repository
       - run:
           name: Run Integration Tests
           command: |
             export M2_HOME=/usr/lib/mvn
             jfrog rt c artifactory-qa --url=$ARTIFACTORY_URL --user=$ARTIFACTORY_USERNAME --password=$ARTIFACTORY_PASSWORD
-            docker exec -it projecttemplate_maven_1 mvn -f "/root/.m2/pom.xml" verify -P integration-test
+            docker exec -it tryitshipit_maven_1 mvn -f "/root/.m2/pom.xml" verify -P integration-test
 
 ### Commented out to prevent template from publishing or deploying ###
 #  publish:
@@ -97,18 +97,18 @@ jobs:
 #            aws ecr get-login --no-include-email --region $AWS_REGION | awk '{printf $6}' | docker login -u AWS $DOCKER_REPO --password-stdin
 #            if [ "$CIRCLE_BRANCH" = "master" ]
 #            then
-#                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH -t $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH .
+#                docker build -t $DOCKER_REPO/tryitshipit:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/tryitshipit:$GIT_HASH -t $DOCKER_REPO/tryitshipit:$CIRCLE_BRANCH .
 #            else
-#                docker build -t $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/projecttemplate:$GIT_HASH .
+#                docker build -t $DOCKER_REPO/tryitshipit:$CIRCLE_BUILD_NUM -t $DOCKER_REPO/tryitshipit:$GIT_HASH .
 #            fi
 #      - run:
 #          name: Publish Docker Image
 #          command: |
-#            docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BUILD_NUM
-#            docker push $DOCKER_REPO/projecttemplate:$GIT_HASH
+#            docker push $DOCKER_REPO/tryitshipit:$CIRCLE_BUILD_NUM
+#            docker push $DOCKER_REPO/tryitshipit:$GIT_HASH
 #            if [ "$CIRCLE_BRANCH" = "master" ]
 #            then
-#                docker push $DOCKER_REPO/projecttemplate:$CIRCLE_BRANCH
+#                docker push $DOCKER_REPO/tryitshipit:$CIRCLE_BRANCH
 #            fi
 #  deploy:
 #    working_directory: /devops
@@ -120,8 +120,8 @@ jobs:
 #          command: |
 #            bash kubeconfig.sh
 #            export GIT_HASH=$(eval echo ${CIRCLE_SHA1:0:7})
-#            helm upgrade --install --force --namespace $STACK projecttemplate-$STACK ./charts/projecttemplate --set image.tag=$GIT_HASH \
-#            -f ./charts/projecttemplate/$STACK.yaml --tls --recreate-pods
+#            helm upgrade --install --force --namespace $STACK tryitshipit-$STACK ./charts/tryitshipit --set image.tag=$GIT_HASH \
+#            -f ./charts/tryitshipit/$STACK.yaml --tls --recreate-pods
 workflows:
   version: 2
   qa01_workflow:

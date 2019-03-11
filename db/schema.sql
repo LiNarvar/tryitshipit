@@ -1,11 +1,11 @@
 -- Create table space
-DROP SCHEMA IF EXISTS projecttemplate CASCADE;
-CREATE SCHEMA projecttemplate;
+DROP SCHEMA IF EXISTS tryitshipit CASCADE;
+CREATE SCHEMA tryitshipit;
 
 
 -- Create Tables
-DROP TABLE IF EXISTS projecttemplate.table1;
-CREATE TABLE IF NOT EXISTS projecttemplate.table1 (
+DROP TABLE IF EXISTS tryitshipit.table1;
+CREATE TABLE IF NOT EXISTS tryitshipit.table1 (
     intfield1 int,
     textfield2 text,
     realfield3 real,
@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS projecttemplate.table1 (
 );
 
 -- Empty tables
-TRUNCATE TABLE projecttemplate.table1;
+TRUNCATE TABLE tryitshipit.table1;
