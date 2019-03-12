@@ -1,3 +1,7 @@
+-- Create table space
+DROP SCHEMA IF EXISTS tryitshipit CASCADE;
+CREATE SCHEMA tryitshipit;
+
 -- Create Tables
 DROP TABLE IF EXISTS retailer_info;
 CREATE TABLE IF NOT EXISTS retailer_info
