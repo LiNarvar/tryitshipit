@@ -1,7 +1,6 @@
 package com.narvar.tryitshipit.contracts.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.narvar.tryitshipit.contracts.dto.request.AttributesDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
