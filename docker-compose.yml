@@ -62,6 +62,8 @@ services:
     - postgres_db
     - load_the_data
     restart: on-failure
+    environment:
+    - spring.datasource.url=jdbc:postgresql://postgres_db:5432/tryitshipit
 
 volumes:
   data: {}
