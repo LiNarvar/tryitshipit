@@ -1,1 +1,17 @@
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/RetailerInfoDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/ReservationDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/RequestDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/FittingRoomDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/ReservationItemDAO.java
 /Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/TryItShipItApplication.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/CustomerInfoRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/ReservationItemRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/StoreInfoRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/RetailerInfoRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/ReservationRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/CustomerInfoDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/StoreInfoDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/RequestRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/FittingRoomRepository.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/dao/ItemInfoDAO.java
+/Users/liyu/dev/narvar/innovation_tourny/tryitshipit/web/src/main/java/com/narvar/tryitshipit/web/persistence/repository/ItemInfoRepository.java
