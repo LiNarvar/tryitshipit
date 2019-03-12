@@ -2,9 +2,8 @@
 DROP TABLE IF EXISTS retailer_info;
 CREATE TABLE IF NOT EXISTS retailer_info
 (
-  "dbio_rowid"  serial,
+  "dbio_rowid"  integer,
   "uri_moniker" VARCHAR(255) NOT NULL,
-  "created_at"  DATETIME,
   CONSTRAINT retailer_info_pk PRIMARY KEY ("dbio_rowid")
 ) WITH (
     OIDS= FALSE
@@ -14,7 +13,7 @@ CREATE TABLE IF NOT EXISTS retailer_info
 DROP TABLE IF EXISTS store_info;
 CREATE TABLE IF NOT EXISTS store_info
 (
-  "store_id"       serial,
+  "store_id"       integer,
   "address_line1" VARCHAR(256) NOT NULL,
   "address_line2" VARCHAR(256) NOT NULL,
   "city"           VARCHAR(256) NOT NULL,
@@ -31,7 +30,7 @@ CREATE TABLE IF NOT EXISTS store_info
 DROP TABLE IF EXISTS fitting_room;
 CREATE TABLE IF NOT EXISTS fitting_room
 (
-  "id"        serial  NOT NULL,
+  "id"        integer  NOT NULL,
   "store_id"  serial  NOT NULL,
   "available" BOOLEAN NOT NULL,
   CONSTRAINT fitting_room_pk PRIMARY KEY ("id")
@@ -43,7 +42,7 @@ CREATE TABLE IF NOT EXISTS fitting_room
 DROP TABLE IF EXISTS item_info;
 CREATE TABLE IF NOT EXISTS item_info
 (
-  "item_id"     serial       NOT NULL,
+  "item_id"     integer       NOT NULL,
   "store_id"    integer      NOT NULL,
   "sku"         VARCHAR(255) NOT NULL,
   "description" VARCHAR(256) NOT NULL,
@@ -79,7 +78,7 @@ CREATE TABLE IF NOT EXISTS requests
 DROP TABLE IF EXISTS customer_info;
 CREATE TABLE IF NOT EXISTS customer_info
 (
-  "id"   serial  NOT NULL,
+  "id"   integer  NOT NULL,
   "name" integer NOT NULL,
   CONSTRAINT customer_info_pk PRIMARY KEY ("id")
 ) WITH (
