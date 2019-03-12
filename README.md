@@ -1,2 +1,2 @@
-# ProjectTemplate
-Template for creating new projects
+# Try It Ship It
+Innovation Tournament Project
