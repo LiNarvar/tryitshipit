@@ -5,8 +5,6 @@ services:
     container_name: tryitshipit_db
     image: postgres:11.2
     restart: always
-    volumes:
-      - data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
@@ -65,5 +63,3 @@ services:
     environment:
     - spring.datasource.url=jdbc:postgresql://postgres_db:5432/tryitshipit
 
-volumes:
-  data: {}
