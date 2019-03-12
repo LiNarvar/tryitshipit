@@ -15,8 +15,8 @@ DROP TABLE IF EXISTS store_info;
 CREATE TABLE IF NOT EXISTS store_info
 (
   "store_id"       serial,
-  "address_line_1" VARCHAR(256) NOT NULL,
-  "address_line_2" VARCHAR(256) NOT NULL,
+  "address_line1" VARCHAR(256) NOT NULL,
+  "address_line2" VARCHAR(256) NOT NULL,
   "city"           VARCHAR(256) NOT NULL,
   "state"          VARCHAR(256) NOT NULL,
   "country"        VARCHAR(256) NOT NULL,
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS fitting_room
 DROP TABLE IF EXISTS item_info;
 CREATE TABLE IF NOT EXISTS item_info
 (
-  "store_id"    integer      NOT NULL,
   "item_id"     serial       NOT NULL,
+  "store_id"    integer      NOT NULL,
   "sku"         VARCHAR(255) NOT NULL,
   "description" VARCHAR(256) NOT NULL,
   "color"       VARCHAR(256) NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS reservations
   "fitting_room_id" integer   NOT NULL,
   "store_id"        integer   NOT NULL,
   "customer_id"     integer,
-  "begin_time"      TIMESTAMP NOT NULL,
+  "created_time"      TIMESTAMP NOT NULL,
   "end_time"        TIMESTAMP NOT NULL,
   CONSTRAINT reservations_pk PRIMARY KEY ("id")
 ) WITH (
