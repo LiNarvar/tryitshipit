@@ -10,6 +10,7 @@ mvnw.cmd
 **/pom.properties
 **/createdFiles.lst
 
+
 ### STS ###
 .apt_generated
 .classpath
